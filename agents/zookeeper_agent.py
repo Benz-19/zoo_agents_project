@@ -1,41 +1,39 @@
 # zookeeper_agent.py
 from spade.agent import Agent
-from spade.behaviour import OneShotBehaviour
+from spade.behaviour import CyclicBehaviour
 from spade.message import Message
-import asyncio
 import json
+import asyncio
+from utils.zoo_utils import print_report
 
 class ZookeeperAgent(Agent):
-    class CollectReportsBehaviour(OneShotBehaviour):
-        async def run(self):
-            print("Zookeeper asking animals for reports...")
+    class MonitorBehaviour(CyclicBehaviour):
+        async def on_start(self):
+            print("ZookeeperAgent starting...")
+            self.reports = []
 
+        async def run(self):
+            # Request reports from all animals
             for animal_jid in self.agent.animal_agents:
-                # Create a message for each animal agent
                 msg = Message(to=animal_jid)
                 msg.body = "report"
                 await self.send(msg)
+                # print(f"Requested report from {animal_jid}")
 
             # Collect replies
-            reports = []
             for _ in self.agent.animal_agents:
                 reply = await self.receive(timeout=5)
                 if reply:
                     report = json.loads(reply.body)
-                    reports.append(report)
-                else:
-                    reports.append({"name": "unknown", "error": "No reply"})
+                    self.reports.append(report)
 
-            # Print the summary
-            print("\n--- Zoo Daily Report ---")
-            for r in reports:
-                print(f"{r['name']} | Hunger: {r.get('hunger', 'N/A')} | Energy: {r.get('energy', 'N/A')} | Predator: {r.get('predator', 'N/A')} | Legs: {r.get('legs', 'N/A')}")
-            print("--- End of Report ---\n")
+            if self.reports:
+                print_report(self.reports)
+                self.reports = []
 
-            # Stop the agent after reporting
-            await self.agent.stop()
+            await asyncio.sleep(3)  # Wait before next check
 
     async def setup(self):
-        print("Zookeeper agent starting...")
-        behaviour = self.CollectReportsBehaviour()
+        print("ZookeeperAgent setup complete.")
+        behaviour = self.MonitorBehaviour()
         self.add_behaviour(behaviour)

@@ -1,22 +1,20 @@
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 from spade.message import Message
-import pandas as pd
 import json
 import random
 import asyncio
+from utils.zoo_utils import load_zoo_dataset, get_animal_traits
 
 class AnimalAgent(Agent):
     class AnimalBehaviour(CyclicBehaviour):
         async def on_start(self):
             print(f"{self.agent.animal_name} agent starting...")
-            df = pd.read_csv("data/zoo.data", header=None)
-            df.columns = ["animal_name", "hair", "feathers", "eggs", "milk", "airborne",
-                          "aquatic", "predator", "toothed", "backbone", "breathes", 
-                          "venomous", "fins", "legs", "tail", "domestic", "catsize", "type"]
-            
-            self.animal_row = df[df["animal_name"] == self.agent.animal_name].iloc[0]
-            
+
+            # Load dataset using zoo_utils
+            df = load_zoo_dataset()
+            self.animal_row = get_animal_traits(df, self.agent.animal_name)
+
             # Initialize simple states
             self.hunger = random.randint(0, 50)   # 0 = full, 100 = very hungry
             self.energy = random.randint(50, 100) # 0 = tired, 100 = full energy
@@ -25,7 +23,6 @@ class AnimalAgent(Agent):
             # Listen for messages
             msg = await self.receive(timeout=5)
             if msg:
-                # If zookeeper asks for a report
                 if msg.body == "report":
                     report = {
                         "name": self.agent.animal_name,
@@ -45,7 +42,6 @@ class AnimalAgent(Agent):
                 await asyncio.sleep(1)
 
     async def setup(self):
-        # animal_name must be provided when creating the agent
         print(f"AnimalAgent for {self.animal_name} starting...")
         behaviour = self.AnimalBehaviour()
         self.add_behaviour(behaviour)
