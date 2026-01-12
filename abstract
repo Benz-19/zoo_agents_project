@@ -1,0 +1,11 @@
+Zoo Animals Dataset (ZooSim-300): synthetic multi-agent dataset for constrained zoo management. 300 virtual animals across 13 species with 10 attributes: weight, speed, intelligence, aggression, energy. Enables ML research for priority classification & resource allocation. Benchmark for constrained optimization & multi-agent coordination. Applications: healthcare triage, disaster response, conservation. Complete simulation code ensures reproducibility.
+
+Keywords: multi-agent systems, resource allocation, animal welfare, priority classification
+
+Instances:300
+Attributes:10
+Characteristics: Integer, Real, Categorical
+Missing: None
+Area: Multi-Agent Systems, ML
+Date:2026
+Tasks: Classification, Regression

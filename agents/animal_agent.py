@@ -1,47 +1,68 @@
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
-from spade.message import Message
-import json
-import random
 import asyncio
-from utils.zoo_utils import load_zoo_dataset, get_animal_traits
+import time
+
+class Animal:
+    """Represents an animal in the zoo simulation"""
+    def __init__(self, species, animal_id, energy, diet, features):
+        self.species = species
+        self.id = animal_id
+        self.display_name = f"{species}_{animal_id}"
+        self.energy = energy
+        self.diet = diet
+        self.features = features
+        self.dead = False
+        self.feed_log = []
+        
+        # Different energy decay based on size/metabolism
+        if species in ['elephant', 'whale']:
+            self.energy_decay = 1.5
+        elif species in ['frog', 'eagle', 'penguin']:
+            self.energy_decay = 4.0
+        else:
+            self.energy_decay = 2.5
+        
+        # Set meal type
+        if diet == 'carnivore':
+            self.meal = "meat"
+        elif diet == 'herbivore':
+            self.meal = "plants"
+        elif diet == 'insectivore':
+            self.meal = "insects"
+        else:
+            self.meal = "fish"
+
+    def process_life_cycle(self, elapsed_time):
+        """Process animal's energy decay and check for death"""
+        if self.dead:
+            return False
+        
+        # Calculate energy loss
+        energy_loss = self.energy_decay * elapsed_time
+        self.energy = max(0, self.energy - energy_loss)
+        
+        # Check for death
+        if self.energy <= 0:
+            self.energy = 0
+            self.dead = True
+            return True
+        
+        return False
 
 class AnimalAgent(Agent):
-    class AnimalBehaviour(CyclicBehaviour):
-        async def on_start(self):
-            print(f"{self.agent.animal_name} agent starting...")
-
-            # Load dataset using zoo_utils
-            df = load_zoo_dataset()
-            self.animal_row = get_animal_traits(df, self.agent.animal_name)
-
-            # Initialize simple states
-            self.hunger = random.randint(0, 50)   # 0 = full, 100 = very hungry
-            self.energy = random.randint(50, 100) # 0 = tired, 100 = full energy
-
+    """SPADE agent representing an autonomous animal"""
+    def __init__(self, jid, password, animal_instance):
+        super().__init__(jid, password)
+        self.animal = animal_instance
+    
+    class LifeCycleBehaviour(CyclicBehaviour):
+        """Autonomous behavior for animal lifecycle management"""
         async def run(self):
-            # Listen for messages
-            msg = await self.receive(timeout=5)
-            if msg:
-                if msg.body == "report":
-                    report = {
-                        "name": self.agent.animal_name,
-                        "hunger": self.hunger,
-                        "energy": self.energy,
-                        "predator": int(self.animal_row["predator"]),
-                        "legs": int(self.animal_row["legs"])
-                    }
-                    reply = Message(to=str(msg.sender))
-                    reply.body = json.dumps(report)
-                    await self.send(reply)
-                    print(f"{self.agent.animal_name} sent report to Zookeeper.")
-            else:
-                # Update internal states a little
-                self.hunger = min(100, self.hunger + random.randint(1,5))
-                self.energy = max(0, self.energy - random.randint(1,3))
-                await asyncio.sleep(1)
-
+            # This behavior would typically handle agent communication
+            # For simulation purposes, we track agent activity
+            await asyncio.sleep(1)
+    
     async def setup(self):
-        print(f"AnimalAgent for {self.animal_name} starting...")
-        behaviour = self.AnimalBehaviour()
-        self.add_behaviour(behaviour)
+        """Initialize agent behaviors"""
+        self.add_behaviour(self.LifeCycleBehaviour())

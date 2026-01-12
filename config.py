@@ -1,26 +1,23 @@
-# Example SPADE accounts for agents
-# Replace these with real JIDs and passwords if you run SPADE
+# Animal energy settings
+ENERGY_DECAY = 3
+FEED_ENERGY_GAIN = 35
+FEEDING_THRESHOLD = 40  # Feed when energy < 40
 
-# Animal agents
-LION_JID = "lion@localhost"
-LION_PASSWORD = "lionpwd"
+# ML settings
+ML_CONFIDENCE_THRESHOLD = 0.65
 
-ELEPHANT_JID = "elephant@localhost"
-ELEPHANT_PASSWORD = "elephantpwd"
+# Food supply settings
+FOOD_DECREASE = 2  # Food decreases by this amount each tick
+LOW_FOOD_THRESHOLD = 20  # Warn when food stock is below this
 
-FROG_JID = "frog@localhost"
-FROG_PASSWORD = "frogpwd"
+# Food stock settings
+INITIAL_FOOD_STOCK = {
+    "meat": 1000000000,
+    "plants": 20000000,
+    "fish": 1000000,
+    "insects": 1000000
+}
 
-CROW_JID = "crow@localhost"
-CROW_PASSWORD = "crowpwd"
-
-# Zookeeper
-ZOOKEEPER_JID = "zookeeper@localhost"
-ZOOKEEPER_PASSWORD = "zookeeperpwd"
-
-# Food supply agent
-FOOD_JID = "food@localhost"
-FOOD_PASSWORD = "foodpwd"
-
-# Message timeout in seconds
-MESSAGE_TIMEOUT = 5
+# Timing intervals
+TICK_INTERVAL = 2  # Seconds between animal updates
+FEEDING_INTERVAL = 3  # Seconds between feeding checks
